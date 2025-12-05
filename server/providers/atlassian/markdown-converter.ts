@@ -39,9 +39,13 @@ export interface ADFDocument {
 }
 
 /**
- * Convert markdown text to ADF format
- * @param markdown - Markdown text to convert
- * @returns ADF document object
+ * Converts new Markdown content to ADF (AI output, error messages, user-written strings).
+ * 
+ * ⚠️ NEVER use for round-trip conversions of existing Jira content.
+ * For manipulating existing Jira ADF, use ADF operations directly.
+ * 
+ * @param markdown - Markdown string to convert
+ * @returns ADF document structure
  */
 export async function convertMarkdownToAdf(markdown: string): Promise<ADFDocument> {
   if (!markdown || typeof markdown !== 'string') {
@@ -337,13 +341,12 @@ export function extractADFSection(
 
 
 /**
- * Convert ADF (Atlassian Document Format) to Markdown
+ * Converts ADF (Atlassian Document Format) to Markdown for AI prompt consumption only.
  * 
- * Converts ADF nodes to markdown text while preserving formatting,
- * structure, and links. Used to extract epic context for AI prompts.
+ * ⚠️ NEVER use for data manipulation, as this is a lossy conversion.
  * 
  * @param adf - ADF document to convert
- * @returns Markdown string
+ * @returns Markdown string for AI prompts only
  */
 export function convertAdfToMarkdown(adf: ADFDocument): string {
   logger.info('Converting ADF to markdown', {
@@ -370,7 +373,7 @@ export function convertAdfToMarkdown(adf: ADFDocument): string {
  * @param nodes - Array of ADF nodes
  * @returns Markdown string
  */
-function convertAdfNodesToMarkdown(nodes: ADFNode[]): string {
+export function convertAdfNodesToMarkdown(nodes: ADFNode[]): string {
   return nodes.map(node => convertAdfNodeToMarkdown(node)).join('');
 }
 

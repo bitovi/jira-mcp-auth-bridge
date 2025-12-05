@@ -23,11 +23,11 @@
 
 **Helper Function Guidelines:**
 - **Semi-specific helpers** (parsers, validators, domain logic) → Separate module files
-  - Example: `shell-story-parser.ts` with `parseShellStories()` function
+  - Example: `shell-story-parser.ts` with `parseShellStoriesFromAdf()` and `addCompletionMarkerToShellStory()` functions
   - Definition: Could be used by different workflows, minimal dependencies on external state/parameters
   - Benefits: Testable, reusable, maintainable
   - Export types/interfaces used across modules
-  - Export functions for testing: `export function parseShellStories(...)`
+  - Export functions for testing: `export function parseShellStoriesFromAdf(...)`, `export function addCompletionMarkerToShellStory(...)`
 - **Broad workflow steps** → Exported functions at bottom of main file, in execution order
   - Example: `fetchEpicAndExtractShellStories()`, `findNextUnwrittenStory()`, `validateDependencies()`
   - These orchestrate the tool's main workflow steps

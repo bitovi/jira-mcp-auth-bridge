@@ -80,8 +80,8 @@ export async function executeAnalyzeFeatureScope(
     debugDir,
     figmaFileKey,
     yamlContent,
-    epicContext,
-    contentWithoutSection,
+    epicWithoutShellStoriesMarkdown: epicContext,
+    epicWithoutShellStoriesAdf,
     cloudId: resolvedCloudId,
     siteName: resolvedSiteName,
     analyzedScreens
@@ -111,7 +111,7 @@ export async function executeAnalyzeFeatureScope(
     cloudId: resolvedCloudId,
     atlassianClient,
     scopeAnalysisMarkdown: scopeAnalysisResult.scopeAnalysisContent,
-    contentWithoutScopeAnalysis: contentWithoutSection,
+    contentWithoutScopeAnalysis: epicWithoutShellStoriesAdf,
     notify
   });
 

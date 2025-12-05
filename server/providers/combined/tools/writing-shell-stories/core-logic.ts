@@ -26,10 +26,10 @@ import {
   SHELL_STORY_MAX_TOKENS
 } from './prompt-shell-stories.js';
 import { 
-  convertMarkdownToAdf, 
+  convertMarkdownToAdf,
+  convertAdfNodesToMarkdown,
   validateAdf,
   extractADFSection,
-  convertAdfToMarkdown,
   type ADFNode,
   type ADFDocument
 } from '../../../atlassian/markdown-converter.js';
@@ -121,8 +121,8 @@ export async function executeWriteShellStories(
     allFrames,
     allNotes,
     figmaFileKey,
-    epicContext,
-    contentWithoutShellStories,
+    epicWithoutShellStoriesMarkdown,
+    epicWithoutShellStoriesAdf,
     figmaUrls,
     cloudId: resolvedCloudId,
     siteName: resolvedSiteName,
@@ -147,7 +147,7 @@ export async function executeWriteShellStories(
     allFrames,
     allNotes,
     figmaFileKey,
-    epicContext,
+    epicContext: epicWithoutShellStoriesMarkdown,
     notify: async (message: string) => {
       // Show progress for each screen (auto-increments)
       await notify(message);
@@ -167,7 +167,7 @@ export async function executeWriteShellStories(
     figmaFileKey,
     yamlContent,
     notify,
-    epicContext
+    epicContext: epicWithoutShellStoriesMarkdown
   });
 
   // ==========================================
@@ -185,7 +185,7 @@ export async function executeWriteShellStories(
       cloudId: resolvedCloudId,
       atlassianClient,
       shellStoriesMarkdown: shellStoriesContent,
-      contentWithoutShellStories,
+      epicWithoutShellStoriesAdf,
       notify
     });
   } else {
@@ -352,9 +352,9 @@ No shell stories content received from AI
  * @param params - Parameters for updating the epic
  * @param params.epicKey - The Jira epic key
  * @param params.cloudId - The Atlassian cloud ID
- * @param params.token - The Atlassian access token
- * @param params.shellStoriesMarkdown - The shell stories markdown content
- * @param params.contentWithoutShellStories - The epic description ADF content without Shell Stories section (from Phase 1.6)
+ * @param params.atlassianClient - Atlassian API client with auth
+ * @param params.shellStoriesMarkdown - The AI-generated shell stories markdown content
+ * @param params.epicWithoutShellStoriesAdf - The epic description ADF content without Shell Stories section (from setupResult)
  * @param params.notify - Progress notification function
  */
 async function updateEpicWithShellStories({
@@ -362,14 +362,14 @@ async function updateEpicWithShellStories({
   cloudId,
   atlassianClient,
   shellStoriesMarkdown,
-  contentWithoutShellStories,
+  epicWithoutShellStoriesAdf,
   notify
 }: {
   epicKey: string;
   cloudId: string;
   atlassianClient: ToolDependencies['atlassianClient'];
   shellStoriesMarkdown: string;
-  contentWithoutShellStories: ADFNode[];
+  epicWithoutShellStoriesAdf: ADFNode[];
   notify: ToolDependencies['notify'];
 }): Promise<void> {
   console.log('  Phase 6: Updating epic with shell stories...');
@@ -391,14 +391,14 @@ async function updateEpicWithShellStories({
     console.log('    ✅ Shell stories converted to ADF');
     
     // Check if combined size would exceed Jira's limit
-    const wouldExceed = wouldExceedLimit(contentWithoutShellStories, shellStoriesAdf);
+    const wouldExceed = wouldExceedLimit(epicWithoutShellStoriesAdf, shellStoriesAdf);
 
-    let finalContent = contentWithoutShellStories;
+    let finalContent = epicWithoutShellStoriesAdf;
 
     if (wouldExceed) {
       // Extract Scope Analysis section from content
       const { section: scopeAnalysisSection, remainingContent } = extractADFSection(
-        contentWithoutShellStories,
+        epicWithoutShellStoriesAdf,
         'Scope Analysis'
       );
       
@@ -406,15 +406,8 @@ async function updateEpicWithShellStories({
         console.log('  ⚠️ Moving Scope Analysis to comment (content would exceed 43KB limit)');
         await notify('⚠️ Moving Scope Analysis to comment to stay within 43KB limit...');
         
-        // Wrap in document structure for conversion
-        const scopeAnalysisDoc: ADFDocument = {
-          version: 1,
-          type: 'doc',
-          content: scopeAnalysisSection
-        };
-        
         // Convert to markdown
-        const scopeAnalysisMarkdown = convertAdfToMarkdown(scopeAnalysisDoc);
+        const scopeAnalysisMarkdown = convertAdfNodesToMarkdown(scopeAnalysisSection);
         
         // Post as comment
         try {

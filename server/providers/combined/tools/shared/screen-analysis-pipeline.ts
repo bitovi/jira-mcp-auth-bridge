@@ -38,8 +38,8 @@ export interface ScreenAnalysisResult {
   figmaFileKey: string;
   debugDir: string | null;
   yamlContent: string;
-  epicContext: string;
-  contentWithoutSection: ADFNode[]; // Epic description ADF without specified section
+  epicWithoutShellStoriesMarkdown: string;
+  epicWithoutShellStoriesAdf: ADFNode[];
   figmaUrls: string[];
   cloudId: string;
   siteName: string;
@@ -94,9 +94,9 @@ export async function executeScreenAnalysisPipeline(
     allFrames,
     allNotes,
     figmaFileKey,
-    yamlPath,
-    epicContext,
-    contentWithoutShellStories, // Note: This is actually "contentWithout{sectionName}" but field name not changed yet
+    yamlContent,
+    epicWithoutShellStoriesMarkdown,
+    epicWithoutShellStoriesAdf,
     figmaUrls,
     cloudId: resolvedCloudId,
     siteName: resolvedSiteName
@@ -118,7 +118,7 @@ export async function executeScreenAnalysisPipeline(
     allFrames,
     allNotes,
     figmaFileKey,
-    epicContext,
+    epicContext: epicWithoutShellStoriesMarkdown,
     notify: async (message: string) => {
       // Show progress for each screen (auto-increments)
       await notify(message);
@@ -134,9 +134,9 @@ export async function executeScreenAnalysisPipeline(
     allNotes,
     figmaFileKey,
     debugDir,
-    yamlContent: setupResult.yamlContent,
-    epicContext,
-    contentWithoutSection: contentWithoutShellStories, // TODO: Rename in setupFigmaScreens to be more generic
+    yamlContent,
+    epicWithoutShellStoriesMarkdown,
+    epicWithoutShellStoriesAdf,
     figmaUrls,
     cloudId: resolvedCloudId,
     siteName: resolvedSiteName,

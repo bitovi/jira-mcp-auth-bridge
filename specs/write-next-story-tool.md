@@ -76,7 +76,7 @@ This tool writes the next Jira story from a list of shell stories in an epic. It
 
 **Data structure to create**:
 ```typescript
-interface ParsedShellStory {
+interface ParsedShellStoryMarkdown {
   id: string;              // "st001"
   title: string;           // Story title
   description: string;     // One-sentence description

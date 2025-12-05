@@ -14,7 +14,6 @@
 
 import { describe, test, expect, beforeAll, afterAll } from '@jest/globals';
 import { startTestServer, stopTestServer } from './shared/helpers/test-server.js';
-import { parseShellStories } from '../server/providers/combined/tools/write-next-story/shell-story-parser.js';
 
 // Test configuration from environment (using existing env var names)
 const ATLASSIAN_PAT = process.env.ATLASSIAN_TEST_PAT?.replace(/^"|"/g, ''); // Remove quotes if present (base64 credentials)

@@ -7,7 +7,7 @@
 
 import { readFile } from 'fs/promises';
 import { resolveServerPath } from '../../../../utils/file-paths.js';
-import type { ParsedShellStory } from './shell-story-parser.js';
+import type { ParsedShellStoryADF } from './shell-story-parser.js';
 
 /**
  * System prompt for story generation
@@ -54,8 +54,8 @@ async function loadStoryWritingGuidelines(): Promise<string> {
  * @returns Complete prompt for story generation
  */
 export async function generateStoryPrompt(
-  shellStory: ParsedShellStory,
-  dependencyStories: ParsedShellStory[],
+  shellStory: ParsedShellStoryADF,
+  dependencyStories: ParsedShellStoryADF[],
   analysisFiles: Array<{ screenName: string; content: string }>,
   epicContext?: string
 ): Promise<string> {
@@ -83,7 +83,7 @@ The following dependency stories have already been implemented. Use them for con
 
 ${dependencyStories.map(dep => `### ${dep.id}: ${dep.title}
 
-${dep.rawContent}
+${dep.rawShellStoryMarkdown}
 `).join('\n---\n\n')}
 `
     : '';
@@ -116,7 +116,7 @@ ${epicSection}${dependencySection}${analysisSection}
 
 ### Shell Story Details
 
-${shellStory.rawContent}
+${shellStory.rawShellStoryMarkdown}
 
 ---
 
@@ -137,22 +137,4 @@ Generate a complete Jira story following the Story Writing Guidelines and Comple
 
 **Critical**: Do NOT add speculative features. Do NOT add generic styling requirements. Focus on functional behavior based on the evidence provided.
 `;
-}
-
-/**
- * Format dependency stories for inclusion in prompt
- * Extracts just the essential context without full details
- */
-export function formatDependencySummaries(dependencies: ParsedShellStory[]): string {
-  if (dependencies.length === 0) {
-    return 'No dependencies for this story.';
-  }
-  
-  return dependencies.map(dep => {
-    return `**${dep.id}**: ${dep.title}
-- ${dep.description}
-- Screens: ${dep.screens.length > 0 ? dep.screens.map(s => `[Figma](${s})`).join(', ') : 'None'}
-${dep.included.length > 0 ? `- Included: ${dep.included.join('; ')}` : ''}
-${dep.excluded.length > 0 ? `- Excluded: ${dep.excluded.join('; ')}` : ''}`;
-  }).join('\n\n');
 }
